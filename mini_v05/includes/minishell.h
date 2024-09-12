@@ -6,7 +6,7 @@
 /*   By: tboussad <tboussad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 06:57:29 by eaboudi           #+#    #+#             */
-/*   Updated: 2024/09/10 18:28:12 by tboussad         ###   ########.fr       */
+/*   Updated: 2024/09/12 22:41:15 by tboussad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,8 @@ char        *ft_strndup(char *s, size_t n);
 t_env_list  *find_var(t_env_list *env_list, char *key);
 char        *create_new_content(char *key, char *value);
 void        update_env_var(t_env_list *env_var, char *new_content);
-void        add_or_update_env_var(t_global *global, char *key, char *value);
+// void        add_or_update_env_var(t_global *global, char *key, char *value);
+void        add_or_update_env_var(t_global *global, char *key, char *value, int type);
 t_env_list  *get_var_env2(t_global *global, char *var);
 void        ft_cd(t_global *global, t_cmd_args *cmd_args);
 void        ft_echo(t_cmd_args *cmd_args);

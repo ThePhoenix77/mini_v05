@@ -2,16 +2,35 @@
 
 void ft_env(t_global *global)
 {
-    t_env_list *current;
+    t_env_list *current = global->env_list;
     
-    current = global->env_list;
     while (current)
     {
-        ft_putstr_fd(current->content, STDOUT_FILENO);
-        ft_putstr_fd("\n", STDOUT_FILENO);
+        if (ft_strchr(current->content, '='))
+        {
+            ft_putstr_fd(current->content, STDOUT_FILENO);
+            ft_putstr_fd("\n", STDOUT_FILENO);
+        }
         current = current->next;
     }
 }
+
+// void ft_env(t_global *global)
+// {
+//     t_env_list *current;
+    
+//     current = global->env_list;
+//     while (current)
+//     {
+//         if (current->type != SHOW)
+//         {
+//             ft_putstr_fd(current->content, STDOUT_FILENO);
+//             ft_putstr_fd("\n", STDOUT_FILENO);
+//         }
+//         current = current->next;
+//     }
+// }
+
 
 /*t_lst *new_lst_node(const char *content, t_type type)
 {

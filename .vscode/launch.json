@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/tboussad/push/mini_v06/mini_v05/builtins",
+      "program": "/Users/tboussad/push/mini_v06/mini_v05/builtins/build/Debug/outDebug"
+    }
+  ]
+}

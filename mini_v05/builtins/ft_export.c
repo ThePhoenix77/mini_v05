@@ -5,9 +5,12 @@ void export_without_args(t_global *global)
     t_env_list *tmp = global->env_list;
     while (tmp)
     {
-        ft_putstr_fd("declare -x ", 2);
-        ft_putstr_fd(tmp->content, 2);
-        ft_putstr_fd("\n", 2);
+        if (tmp->type != SHOW)
+        {
+            ft_putstr_fd("declare -x ", 2);
+            ft_putstr_fd(tmp->content, 2);
+            ft_putstr_fd("\n", 2);
+        }
         tmp = tmp->next;
     }
 }
@@ -102,28 +105,104 @@ t_env_list *create_new_node(char *new_content, t_env_list *env_list)
     new_node->content = new_content;
     new_node->next = env_list;
     new_node->prev = NULL;
+    // -*-
+    new_node->type = SHOW;
     if (env_list)
         env_list->prev = new_node;
     return (new_node);
 }
 
-void add_or_update_env_var(t_global *global, char *key, char *value)
+void add_export_node(t_env_list **head, t_env_list *new)
+{
+    t_env_list *last;
+
+    if (!head || !new)
+        return;
+    if (*head == NULL)
+    {
+        *head = new;
+        new->next = NULL;
+        new->prev = NULL;
+    }
+    else
+    {
+        last = *head;
+        while (last->next != NULL)
+            last = last->next;
+        last->next = new;
+        new->prev = last;
+        new->next = NULL;
+    }
+}
+
+// void add_or_update_env_var(t_global *global, char *key, char *value)
+// {
+//     t_env_list *env_var;
+    
+//     env_var = find_var(global->env_list, key);
+//     char *new_content = create_new_content(key, value);
+//     if (!new_content)
+//         return;
+//     if (env_var)
+//         update_env_var(env_var, new_content);
+//     else
+//     {
+//         t_env_list *new_node = create_new_node(new_content, global->env_list);
+//         // if (new_node)
+//         //     global->env_list = new_node;
+//         add_export_node(&global->env_list, new_node);
+//     }
+// }
+
+// void handle_key_value(t_global *global, char *content)
+// {
+//     char *equal_sign;
+//     char *key;
+//     char *value;
+//     size_t key_length;
+
+//     equal_sign = ft_strchr(content, '=');
+//     if (equal_sign)
+//     {
+//         key_length = equal_sign - content;
+//         key = ft_strndup(content, key_length);
+//         value = ft_strdup(equal_sign + 1);
+//         if (key && value)
+//         {
+//             add_or_update_env_var(global, key, value);
+//             free(key);
+//             free(value);
+//         }
+//     }
+//     // else
+//     //     ft_putstr_fd("export: Invalid 1 format. Use VAR=value.\n", 2);
+// }
+
+void add_or_update_env_var(t_global *global, char *key, char *value, int type)
 {
     t_env_list *env_var;
     
     env_var = find_var(global->env_list, key);
-    char *new_content = create_new_content(key, value);
+    char *new_content = value ? create_new_content(key, value) : ft_strdup(key);
     if (!new_content)
         return;
+    
     if (env_var)
+    {
         update_env_var(env_var, new_content);
+        env_var->type = type;
+    }
     else
     {
         t_env_list *new_node = create_new_node(new_content, global->env_list);
         if (new_node)
-            global->env_list = new_node;
+        {
+            new_node->type = type;  // Set the type (SHOW or DEFINED)
+            add_export_node(&global->env_list, new_node);
+        }
     }
 }
+
 void handle_key_value(t_global *global, char *content)
 {
     char *equal_sign;
@@ -139,13 +218,20 @@ void handle_key_value(t_global *global, char *content)
         value = ft_strdup(equal_sign + 1);
         if (key && value)
         {
-            add_or_update_env_var(global, key, value);
+            add_or_update_env_var(global, key, value, DEFINED);  // Set as DEFINED when key=value
             free(key);
             free(value);
         }
     }
     else
-        ft_putstr_fd("export: Invalid 1 format. Use VAR=value.\n", 2);
+    {
+        key = ft_strdup(content);
+        if (key)
+        {
+            add_or_update_env_var(global, key, NULL, SHOW);  // Set as SHOW when only key is exported
+            free(key);
+        }
+    }
 }
 
 void process_export_cmd(t_global *global, t_cmd_args *cmd_args)

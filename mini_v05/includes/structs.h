@@ -6,7 +6,7 @@
 /*   By: tboussad <tboussad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 12:31:37 by eaboudi           #+#    #+#             */
-/*   Updated: 2024/09/11 10:23:31 by tboussad         ###   ########.fr       */
+/*   Updated: 2024/09/12 22:38:42 by tboussad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ typedef enum e_type
 	EXP_HERE_DOC = 16,
 	HERE_DOC_FILE = 17,
 	ERROR_DIS = 18,
+	SHOW = 19,
+	DEFINED = 20,
 }	t_type;
 
 typedef enum e_state
@@ -58,6 +60,7 @@ typedef struct s_env_list
 	char				*content;
 	struct	s_env_list	*next;
 	struct	s_env_list	*prev;
+	int					type;
 }	t_env_list;
 
 typedef struct s_expand_list

@@ -24,8 +24,8 @@ void update_pwd(t_global *global)
     tmp = find_var(global->env_list, "PWD");
     old_pwd = tmp->content + 5;
     if (old_pwd)
-        add_or_update_env_var(global, "OLDPWD", old_pwd);
-    add_or_update_env_var(global, "PWD", cwd);
+        add_or_update_env_var(global, "OLDPWD", old_pwd, DEFINED);
+    add_or_update_env_var(global, "PWD", cwd, DEFINED);
     free(cwd);
 }
 

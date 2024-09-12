@@ -21,7 +21,7 @@ void update_pwd(t_global *global)
         perror("getcwd");
         return;
     }
-    tmp = get_var_env2(global, "PWD");
+    tmp = find_var(global->env_list, "PWD");
     old_pwd = tmp->content + 5;
     if (old_pwd)
         add_or_update_env_var(global, "OLDPWD", old_pwd);
@@ -42,7 +42,7 @@ void ft_cd(t_global *global, t_cmd_args *cmd_args)
         new_p = cmd_args->next->content;
     else
     {
-        home = get_var_env2(global, "HOME");
+        home = find_var(global->env_list, "HOME");
         checker(&home, "cd: HOME not set\n");
         home_p = home->content + 5;
         new_p = home_p;
@@ -63,83 +63,3 @@ void ft_cd(t_global *global, t_cmd_args *cmd_args)
     update_pwd(global);
     free(old_p);
 }
-
-// int main()
-// {
-//     t_global global = { NULL };
-//     t_lst cd_cmd_args;
-//     t_env_list *home_env;
-
-//     // Create a minimal environment list with HOME set
-//     home_env = malloc(sizeof(t_env_list));
-//     if (!home_env)
-//     {
-//         perror("malloc");
-//         return 1;
-//     }
-//     home_env->content = ft_strdup("HOME=/home/user");
-//     home_env->next = NULL;
-//     home_env->prev = NULL;
-//     global.env_list = home_env;
-
-//     // Test with no arguments (should use HOME)
-//     cd_cmd.content = NULL;
-//     cd_cmd.next = NULL;
-//     cd_cmd.prev = NULL;
-
-//     // Test changing directory to HOME
-//     printf("Testing cd without arguments...\n");
-//     ft_cd(&global, &cd_cmd);
-
-//     // Add or update PWD environment variable
-//     add_or_update_env_var(&global, "PWD", "/home/user");
-//     add_or_update_env_var(&global, "OLDPWD", "/home");
-
-//     // Test with explicit directory (assuming this directory exists)
-//     cd_cmd.content = "/tmp";
-//     printf("\nTesting cd with /tmp...\n");
-//     ft_cd(&global, &cd_cmd);
-
-//     // Clean up
-//     t_env_list *tmp;
-//     while (global.env_list)
-//     {
-//         tmp = global.env_list;
-//         global.env_list = global.env_list->next;
-//         free(tmp->content);
-//         free(tmp);
-//     }
-
-//     return 0;
-// }
-/*void set_dir(char **env, const char *cwd, const char *owd)
-{
-    setenv("PWD", cwd, 1);
-    setenv("OLDPWD", owd, 1);
-}
-
-int ft_cd(char **args, char **env) {
-    char cwd[1024];
-    char owd[1024];
-
-    getcwd(owd, sizeof(owd));
-
-    if (!args[1])
-    {
-        if (chdir(getenv("HOME")) != 0) {
-            perror("cd");
-            return 1;
-        }
-    }
-    else
-    {
-        if (chdir(args[1]) != 0)
-        {
-            perror("cd");
-            return 1;
-        }
-    }
-    getcwd(cwd, sizeof(cwd));
-    set_dir(env, cwd, owd);
-    return 0;
-}*/

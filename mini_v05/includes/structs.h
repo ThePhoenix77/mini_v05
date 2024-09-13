@@ -6,7 +6,7 @@
 /*   By: tboussad <tboussad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 12:31:37 by eaboudi           #+#    #+#             */
-/*   Updated: 2024/09/12 22:38:42 by tboussad         ###   ########.fr       */
+/*   Updated: 2024/09/13 08:47:42 by tboussad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,6 +121,7 @@ typedef	struct s_global
 	char		*content;
 	int			list_len;
 	char		**env;
+	char		**myenv;
 	t_exc_list		*root;
 	t_lst		*head;
 	t_lst		*pre_head;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eaboudi <eaboudi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tboussad <tboussad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 07:08:18 by eaboudi           #+#    #+#             */
-/*   Updated: 2024/09/06 20:04:41 by eaboudi          ###   ########.fr       */
+/*   Updated: 2024/09/13 08:56:14 by tboussad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ void	init_global(t_global *global, char **env)
 	global->exp_head = NULL;
 	global->here_doc_num = 0;
 	global->root = NULL;
+	global->myenv = NULL;
 }
 
 int	check_valid_in(t_global *global)

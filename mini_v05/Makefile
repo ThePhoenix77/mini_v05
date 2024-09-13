@@ -12,7 +12,7 @@ HEADER = includes
 CFILES = Utils/linked_list_fun.c Utils/utils.c Utils/Utils_Tokeniz1.c Utils/Utils_Tokeniz2.c\
 		 Utils/ft_tokeniz.c Utils/check_syntax.c Utils/clean_memory.c expanding/check_node_expn.c expanding/ft_expand.c\
 		 expanding/exp_utils.c expanding/last_step_exp.c expanding/list_exp_fun.c expanding/exp_utils2.c\
-		 env/env_utils2.c env/shell_level.c env/env_utils.c Utils/ft_heredoc.c Utils/here_doc_utils.c Utils/check_redir.c\
+		 env/env_utils2.c env/env_utils3.c env/shell_level.c env/env_utils.c Utils/ft_heredoc.c Utils/here_doc_utils.c Utils/check_redir.c\
 		 builtins/builtins_utils.c builtins/ft_echo.c builtins/ft_exit.c builtins/ft_pwd.c\
 		 builtins/ft_export.c builtins/ft_unset.c builtins/ft_cd.c builtins/ft_env.c\
 		 excution/build_exc_list.c excution/main_exc.c excution/exc_utils.c Utils/signals.c excution/exc_list_utils.c\

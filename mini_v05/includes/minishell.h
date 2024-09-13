@@ -6,7 +6,7 @@
 /*   By: tboussad <tboussad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 06:57:29 by eaboudi           #+#    #+#             */
-/*   Updated: 2024/09/12 22:41:15 by tboussad         ###   ########.fr       */
+/*   Updated: 2024/09/13 09:22:38 by tboussad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,10 +111,11 @@ t_exc_list  *last_exc_node(t_exc_list *head);
 void        bulid_list_exc(t_global *global);
 void        free_exc_list(t_exc_list **head);
 void    create_node(t_global *global, t_lst **node);
-
+void       env_list_2d_array(t_global *global);
 //
 char *find_path(char **split, char *cmd);
-char *get_path(char *cmd, char **envp);
+char *get_path(char *cmd, t_global *global);
+// char *get_path(char *cmd, char **env);
 void handle_redir_out(t_redir *redir);
 void handle_redir_in(t_redir *redir);
 void handle_dredir_out(t_redir *redir);

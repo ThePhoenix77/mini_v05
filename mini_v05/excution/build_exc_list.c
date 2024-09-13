@@ -12,45 +12,6 @@
 
 #include "minishell.h"
 
-// void    print_exc_list(t_exc_list *head)
-// {
-//     t_exc_list *tmp;
-//     t_cmd_args *cmd;
-//     t_redir *redi;
-//     tmp = head;
-//     while (tmp)
-//     {
-//         cmd = tmp->cmd_args;
-//         redi = tmp->redir;
-//         if (redi)
-//         {
-//             printf("______________redir_________________\n");
-//             while (redi)
-//             {
-//                 printf("redircton::::(%s)\n", redi->file_name);
-//                 printf("redi type::::(%d)\n", redi->type);
-//                 redi = redi->next;
-//             }
-//             printf("_______________________________\n");
-//         }    
-//         if (cmd)
-//         {    
-//             printf("____________cmd_________________\n");
-//             while (cmd)
-//             {
-//                 printf("command::::(%s)\n", cmd->content);
-//                 cmd = cmd->next;
-//             }
-//             printf("_______________________________\n");
-//             printf("_______________________________\n");
-//             printf("_______________________________\n");
-//         }
-//         tmp = tmp->next;
-//     }
-// }
-
-//build execution linkend list
-
 void print_redir(t_redir *redir)
 {
     while (redir)
@@ -117,9 +78,8 @@ void    bulid_list_exc(t_global *global)
             new = new_exc_spot(global, PiPe);
             add_back_exc(&global->root, new);
             mv_node = mv_node->next;
+            // printf("Encountered PIPE\n");
         }
         create_node(global, &mv_node);
     }
-    // print_exc_list(global->root);
-    // exit(1);
 }

@@ -6,28 +6,11 @@
 /*   By: tboussad <tboussad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/06 18:49:25 by eaboudi           #+#    #+#             */
-/*   Updated: 2024/09/10 10:29:49 by tboussad         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:37:47 by tboussad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-//create t_exc_list
-// t_exc_list *create_list_node(t_type_node type)
-// {
-//     t_exc_list *root;
-    
-//     root = malloc(sizeof(t_exc_list));
-//     if (!root)
-//         return (NULL);
-//     root->redir = NULL;
-//     root->cmd_args = NULL;
-//     root->type = type;
-//     root->fd.in = -1;
-//     root->fd.out = -1;
-//     root->next = NULL;
-//     return (root);
-// }
 
 t_exc_list *new_exc_spot(t_global *global, t_type_node type)
 {
@@ -42,6 +25,7 @@ t_exc_list *new_exc_spot(t_global *global, t_type_node type)
     new->fd.in = 0;
     new->fd.out = 1;
     new->cmd_args = NULL;
+    // printf("Created new exc_node: type=%d, fd.in=%d, fd.out=%d\n", new->type, new->fd.in, new->fd.out);
     return (new);
 }
 

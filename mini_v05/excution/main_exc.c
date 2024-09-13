@@ -6,7 +6,7 @@
 /*   By: tboussad <tboussad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 16:01:31 by eaboudi           #+#    #+#             */
-/*   Updated: 2024/09/13 10:03:30 by tboussad         ###   ########.fr       */
+/*   Updated: 2024/09/13 21:44:43 by tboussad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,19 +65,25 @@ void    prepere_list(t_global *global)
 
 void cmd_msg(t_exc_list *list, t_global *global)
 {
-	printf("%s: command not found\n", list->cmd_args->content);
-	global->exit_status = 127;
-	return ;
+    printf("%s: command not found\n", list->cmd_args->content);
+    global->exit_status = 127;
 }
 
-void dupping_and_closing(int pipe_fd[2])
+void dupping_first(int pipe_fd[2])
 {
     dup2(pipe_fd[1], STDOUT_FILENO);
     close(pipe_fd[0]);
     close(pipe_fd[1]);
 }
 
-void closing_and_waiting(t_global* global, pid_t pid1, pid_t pid2, int pipe_fd[2])
+void dupping_second(int pipe_fd[2])
+{
+    dup2(pipe_fd[0], STDIN_FILENO);
+    close(pipe_fd[0]);
+    close(pipe_fd[1]);
+}
+
+void closing_and_waiting(t_global *global, pid_t pid1, pid_t pid2, int pipe_fd[2])
 {
     close(pipe_fd[0]);
     close(pipe_fd[1]);
@@ -85,98 +91,72 @@ void closing_and_waiting(t_global* global, pid_t pid1, pid_t pid2, int pipe_fd[2
     waitpid(pid2, &global->exit_status, 0);
 }
 
-void execute_pipe(t_exc_list* list, t_global* global)
+void execute_pipe(t_exc_list *list, t_global *global)
 {
     int pipe_fd[2];
+    char *path1;
+    char *path2;
     pid_t pid1;
     pid_t pid2;
-    char *path;
     
-    path = get_path(list->cmd_args->content, global);
-    if (!path)
-        return (cmd_msg(list, global));
-    // printf("----------PATH : %s\n", path);
-
-    if (pipe(pipe_fd) < 0)
-        handle_error("pipe");
+    if (pipe(pipe_fd) == -1)
+        return (perror("pipe"));
+    path1 = get_path(list->cmd_args->content, global);
+    path2 = get_path(list->next->cmd_args->content, global);
     pid1 = fork();
     if (pid1 == 0)
-	{
-        dupping_and_closing(pipe_fd);
+    {
+        dupping_first(pipe_fd);
         handle_redirection(list->redir);
-        if (execve(path, get_args_arr(list->cmd_args), global->env) == -1)
-        {
-            perror("execve");
-            // exit(EXIT_FAILURE);
-        }
-        exit(1);
+        execve(path1, get_args_arr(list->cmd_args), global->myenv);
     }
-	else if (pid1 > 0)
-	{
+    else
+    {
         pid2 = fork();
-        path = get_path(list->next->cmd_args->content, global);
-        if (!path)
-            return (cmd_msg(list, global));
         if (pid2 == 0)
-		{
-            dupping_and_closing(pipe_fd);
+        {
+            dupping_second(pipe_fd);
             handle_redirection(list->next->redir);
-            if (execve(path, get_args_arr(list->next->cmd_args), global->env) == -1)
-            {
-                perror("execve");
-                // exit(EXIT_FAILURE);
-            }
-            exit(1);
+            execve(path2, get_args_arr(list->next->cmd_args), global->myenv);
         }
-		else if (pid2 > 0)
-			closing_and_waiting(global, pid1, pid2, pipe_fd);
-        else
-            handle_error("fork");
+        else closing_and_waiting(global, pid1, pid2, pipe_fd);
     }
-	else
-        handle_error("fork");
 }
 
-void execute_list(t_exc_list* list, t_global* global)
+void execute_list(t_exc_list *list, t_global *global)
 {
-    char* path;
+    char *path;
     pid_t pid;
-
+    
     while (list)
-	{
+    {
         if (list->type == CMD)
-		{
+        {
             path = get_path(list->cmd_args->content, global);
+            pid = fork();
             if (!path)
                 return (cmd_msg(list, global));
-            // printf("-------------Path is : %s\n", path);
-            if (!path)
-                return cmd_msg(list, global);
-            pid = fork();
             if (pid == 0)
-			{
+            {
                 handle_redirection(list->redir);
-                if (execve(path, get_args_arr(list->cmd_args), global->env) == -1)
-                {
-                    perror("execve");
-                    exit(EXIT_FAILURE);
-                }
+                execve(path, get_args_arr(list->cmd_args), global->myenv);
                 exit(1);
             }
-			else if (pid > 0)
-				waitpid(pid, &global->exit_status, 0);
-        } else if (list->type == PiPe)
-			execute_pipe(list, global);
+            else
+                waitpid(pid, &global->exit_status, 0);
+        }
+        else if (list->type == PiPe)
+            if (list->next) execute_pipe(list, global);
         list = list->next;
     }
 }
 
 void cmd_or_builtins_chech(t_exc_list *list, t_global *global)
 {
-	char *content;
-
-	content = list->cmd_args->content;
-	if (ft_strcmp(content, "echo") == 0)
+    char *content;
+    
+    content = list->cmd_args->content;
+    if (ft_strcmp(content, "echo") == 0)
         ft_echo(list->cmd_args);
     else if (ft_strcmp(content, "cd") == 0)
         ft_cd(global, list->cmd_args);
@@ -190,21 +170,37 @@ void cmd_or_builtins_chech(t_exc_list *list, t_global *global)
         ft_env(global);
     else if (ft_strcmp(content, "exit") == 0)
         ft_exit(global, list->cmd_args);
-	else
-		execute_list(list, global);
+    else execute_list(list, global);
 }
 
-void    main_exc(t_global *global)
+void print_command_list(t_exc_list *list)
 {
-	t_lst   *tmp;
+    while (list)
+    {
+        if (list->type == CMD)
+        {
+            printf("Command: ");
+            t_cmd_args *cmd = list->cmd_args;
+            while (cmd)
+            {
+                printf("%s ", cmd->content);
+                cmd = cmd->next;
+            }
+            printf("\n");
+        }
+        else if (list->type == PiPe) printf("Pipe\n");
+        list = list->next;
+    }
+}
 
-	global->pre_head = NULL;
-	prepere_list(global);
-	tmp = global->pre_head;
-	bulid_list_exc(global);
-	env_list_2d_array(global);
+void main_exc(t_global *global)
+{
+    global->pre_head = NULL;
+    prepere_list(global);
+    bulid_list_exc(global);
+    // print_command_list(global->root);
+    env_list_2d_array(global);
     cmd_or_builtins_chech(global->root, global);
     free_lst(&global->pre_head);
-	global->pre_head = NULL;
-	free_exc_list(&global->root);
+    free_exc_list(&global->root);
 }

@@ -1,0 +1,114 @@
+void free_env_list(t_env_list **head)
+{
+    t_env_list  *tmp;
+
+    if (!(*head))
+        return ;
+    while ((*head))
+    {
+        tmp = *head;
+        *head = (*head)->next;
+        free(tmp->content);
+        free(tmp);
+    }
+    *head = NULL;
+}
+void malloc_failed(t_global *global)
+{
+    free_memory(global);
+    if (global->content != NULL)
+        free(global->content);
+    if (global->env_list)
+        free_env_list(&global->env_list);
+    exit(1);
+}
+t_exc_list *new_exc_spot(t_global *global, t_type_node type)
+{
+    t_exc_list *new;
+
+    new = (t_exc_list *)malloc(sizeof(t_exc_list));
+    if (!new)
+        malloc_failed(global);
+    new->type = type;
+    new->redir = NULL;
+    new->next = NULL;
+    new->fd.in = 0;
+    new->fd.out = 1;
+    new->cmd_args = NULL;
+    return (new);
+}
+
+t_exc_list *last_exc_node(t_exc_list *head)
+{
+    if (!head)
+        return (NULL);
+    while (head->next)
+        head = head->next;
+    return (head);
+}
+
+void    add_back_exc(t_exc_list **head, t_exc_list *new)
+{
+    t_exc_list  *last_node;
+
+    if (!new && !(*head))
+        return ;
+    if (!(*head))
+        *head = new;
+    else
+    {
+        last_node = last_exc_node((*head));
+        last_node->next = new;
+    }     
+}
+void    create_node(t_global *global, t_lst **node)
+{
+    t_cmd_args  *new_cmd_node;
+    t_redir     *new_rd_node;
+    t_exc_list  *new_exc_node;
+     
+    new_exc_node = new_exc_spot(global, CMD);
+    add_back_exc(&global->root, new_exc_node);
+    while ((*node) && (*node)->type != PIPE)
+    {
+        while (*node && ((*node)->type == WORD || (*node)->type == ENV))
+        {
+            new_cmd_node = new_cmd_element(global, (*node)->content);
+            add_back_element(&new_exc_node->cmd_args, new_cmd_node);
+            (*node) = (*node)->next;
+        }
+        if (*node && ((*node)->type == REDIR_IN
+            || (*node)->type == REDIR_OUT
+            || (*node)->type == DREDIR_OUT))
+        {
+            new_rd_node = new_vertex(global, *node);
+            add_back_redir(&new_exc_node->redir, new_rd_node);
+            *node = (*node)->next->next;
+            while (*node && ((*node)->type == WORD || (*node)->type == ENV))
+            {
+                new_cmd_node = new_cmd_element(global, (*node)->content);
+                add_back_element(&new_exc_node->cmd_args, new_cmd_node);
+                (*node) = (*node)->next;
+            }
+        }
+    }
+}
+void    bulid_list_exc(t_global *global)
+{
+    t_lst       *mv_node;
+    t_lst       *save;
+    t_exc_list  *new;
+
+    mv_node = global->pre_head;
+    save = global->pre_head;
+    while (mv_node)
+    {
+        if (mv_node->type == PIPE)
+        {
+            new = new_exc_spot(global, PiPe);
+            add_back_exc(&global->root, new);
+            mv_node = mv_node->next;
+        }
+        create_node(global, &mv_node);
+    }
+}

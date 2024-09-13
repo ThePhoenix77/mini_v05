@@ -1,5 +1,18 @@
 #include "minishell.h"
 
+// void ft_env(t_global *global)
+// {
+//     t_env_list *tmp;
+
+//     tmp = global->env_list;
+//     while (tmp)
+//     {
+//         if (tmp->type == DEFINED)
+//             ft_putstr_fd(tmp->content, 2);
+//         tmp = tmp->next;
+//     }
+// }
+
 void ft_env(t_global *global)
 {
     t_env_list *current = global->env_list;

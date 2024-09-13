@@ -1,16 +1,25 @@
 #include "minishell.h"
 
+char *ft_strcpy(char *dest, const char *src)
+{
+    char *dest_ptr = dest;
+
+    while (*src)
+    {
+        *dest_ptr++ = *src++;
+    }
+    *dest_ptr = '\0';
+    return dest;
+}
+
 void export_without_args(t_global *global)
 {
     t_env_list *tmp = global->env_list;
     while (tmp)
     {
-        if (tmp->type != SHOW)
-        {
-            ft_putstr_fd("declare -x ", 2);
-            ft_putstr_fd(tmp->content, 2);
-            ft_putstr_fd("\n", 2);
-        }
+        ft_putstr_fd("declare -x ", 2);
+        ft_putstr_fd(tmp->content, 2);
+        ft_putstr_fd("\n", 2);
         tmp = tmp->next;
     }
 }
@@ -27,7 +36,7 @@ int name_checker(char *s)
     i = 0;
     if (!ft_isalpha(s[0]) && s[0] != '_')
         return (-1);
-    while(s[i])
+    while (s[i])
     {
         if (!is_valid_name_char(s[i]))
             return (-1);
@@ -44,44 +53,36 @@ t_env_list *find_var(t_env_list *env_list, char *key)
     while (env_list)
     {
         if (ft_strncmp(env_list->content, key, key_len) == 0 &&
-            env_list->content[key_len] == '=')
+            (env_list->content[key_len] == '=' || env_list->content[key_len] == '\0'))
             return (env_list);
         env_list = env_list->next;
     }
     return (NULL);
 }
 
-char *ft_strcpy(char *dest, char *src)
-{
-    char *dest_ptr;
-    
-    dest_ptr = dest;
-    while (*src != '\0')
-    {
-        *dest_ptr = *src;
-        dest_ptr++;
-        src++;
-    }
-    *dest_ptr = '\0';
-    return (dest);
-}
-
-
 char *create_new_content(char *key, char *value)
 {
     size_t total_len;
     char *new_content;
+
+    if (value)
+        total_len = ft_strlen(key) + ft_strlen(value) + 2;
+    else
+        total_len = ft_strlen(key) + 1;
     
-    total_len = ft_strlen(key) + ft_strlen(value) + 2;
     new_content = malloc(total_len);
     if (!new_content)
     {
         perror("malloc");
         return (NULL);
     }
+    
     ft_strcpy(new_content, key);
-    new_content[ft_strlen(key)] = '=';
-    ft_strcpy(new_content + ft_strlen(key) + 1, value);
+    if (value)
+    {
+        new_content[ft_strlen(key)] = '=';
+        ft_strcpy(new_content + ft_strlen(key) + 1, value);
+    }
     return (new_content);
 }
 
@@ -91,10 +92,10 @@ void update_env_var(t_env_list *env_var, char *new_content)
     env_var->content = new_content;
 }
 
-t_env_list *create_new_node(char *new_content, t_env_list *env_list)
+t_env_list *create_new_node(char *new_content, int type)
 {
     t_env_list *new_node;
-    
+
     new_node = malloc(sizeof(t_env_list));
     if (!new_node)
     {
@@ -103,12 +104,9 @@ t_env_list *create_new_node(char *new_content, t_env_list *env_list)
         return (NULL);
     }
     new_node->content = new_content;
-    new_node->next = env_list;
+    new_node->next = NULL;
     new_node->prev = NULL;
-    // -*-
-    new_node->type = SHOW;
-    if (env_list)
-        env_list->prev = new_node;
+    new_node->type = type;
     return (new_node);
 }
 
@@ -119,11 +117,7 @@ void add_export_node(t_env_list **head, t_env_list *new)
     if (!head || !new)
         return;
     if (*head == NULL)
-    {
         *head = new;
-        new->next = NULL;
-        new->prev = NULL;
-    }
     else
     {
         last = *head;
@@ -131,62 +125,19 @@ void add_export_node(t_env_list **head, t_env_list *new)
             last = last->next;
         last->next = new;
         new->prev = last;
-        new->next = NULL;
     }
 }
-
-// void add_or_update_env_var(t_global *global, char *key, char *value)
-// {
-//     t_env_list *env_var;
-    
-//     env_var = find_var(global->env_list, key);
-//     char *new_content = create_new_content(key, value);
-//     if (!new_content)
-//         return;
-//     if (env_var)
-//         update_env_var(env_var, new_content);
-//     else
-//     {
-//         t_env_list *new_node = create_new_node(new_content, global->env_list);
-//         // if (new_node)
-//         //     global->env_list = new_node;
-//         add_export_node(&global->env_list, new_node);
-//     }
-// }
-
-// void handle_key_value(t_global *global, char *content)
-// {
-//     char *equal_sign;
-//     char *key;
-//     char *value;
-//     size_t key_length;
-
-//     equal_sign = ft_strchr(content, '=');
-//     if (equal_sign)
-//     {
-//         key_length = equal_sign - content;
-//         key = ft_strndup(content, key_length);
-//         value = ft_strdup(equal_sign + 1);
-//         if (key && value)
-//         {
-//             add_or_update_env_var(global, key, value);
-//             free(key);
-//             free(value);
-//         }
-//     }
-//     // else
-//     //     ft_putstr_fd("export: Invalid 1 format. Use VAR=value.\n", 2);
-// }
 
 void add_or_update_env_var(t_global *global, char *key, char *value, int type)
 {
     t_env_list *env_var;
-    
+    char *new_content;
+
     env_var = find_var(global->env_list, key);
-    char *new_content = value ? create_new_content(key, value) : ft_strdup(key);
+    new_content = create_new_content(key, value);
     if (!new_content)
         return;
-    
+
     if (env_var)
     {
         update_env_var(env_var, new_content);
@@ -194,12 +145,9 @@ void add_or_update_env_var(t_global *global, char *key, char *value, int type)
     }
     else
     {
-        t_env_list *new_node = create_new_node(new_content, global->env_list);
+        t_env_list *new_node = create_new_node(new_content, type);
         if (new_node)
-        {
-            new_node->type = type;  // Set the type (SHOW or DEFINED)
             add_export_node(&global->env_list, new_node);
-        }
     }
 }
 
@@ -218,7 +166,7 @@ void handle_key_value(t_global *global, char *content)
         value = ft_strdup(equal_sign + 1);
         if (key && value)
         {
-            add_or_update_env_var(global, key, value, DEFINED);  // Set as DEFINED when key=value
+            add_or_update_env_var(global, key, value, DEFINED);
             free(key);
             free(value);
         }
@@ -228,7 +176,7 @@ void handle_key_value(t_global *global, char *content)
         key = ft_strdup(content);
         if (key)
         {
-            add_or_update_env_var(global, key, NULL, SHOW);  // Set as SHOW when only key is exported
+            add_or_update_env_var(global, key, NULL, SHOW);
             free(key);
         }
     }
@@ -252,42 +200,3 @@ void ft_export(t_global *global, t_cmd_args *cmd_args)
     else
         process_export_cmd(global, cmd_args);
 }
-
-
-/*void ft_export(t_global *global, t_lst *cmd)
-{
-    size_t key_length;
-    char *value;
-    char *key;
-
-    if (!cmd->next)
-        export_without_args(global);
-    else if (name_checker(cmd->content) == -1)
-        printf("export: Invalid variable name !!!!\n");
-    else
-    {
-        char *equal_sign;
-        while (cmd)
-        {
-            if (cmd->type == WORD)
-            {
-                equal_sign = ft_strchr(cmd->content, '=');
-                if (equal_sign)
-                {
-                    key_length = equal_sign - cmd->content;
-                    key = ft_strndup(cmd->content, key_length);
-                    value = ft_strdup(equal_sign + 1);
-                    if (key && value)
-                    {
-                        add_or_update_env_var(global, key, value);
-                        free(key);
-                        free(value);
-                    }
-                }
-                else
-                    printf("export: Invalid format. Use VAR=value.\n");
-            }
-            cmd = cmd->next;
-        }
-    }
-}*/

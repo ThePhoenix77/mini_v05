@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   redir_list.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eaboudi <eaboudi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tboussad <tboussad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 09:37:25 by eaboudi           #+#    #+#             */
-/*   Updated: 2024/09/09 10:06:01 by eaboudi          ###   ########.fr       */
+/*   Updated: 2024/09/13 15:39:43 by tboussad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
 
 //create new node of redirection list
 t_redir *new_vertex(t_global *global, t_lst *node)

@@ -25,7 +25,7 @@ void env_list_2d_array(t_global *global)
     // printf("%d list size\n", list_size);
     tmp = global->env_list;
     i = 0;
-    global->myenv = (char **)malloc(sizeof(char) * (list_size + 1));
+    global->myenv = (char **)malloc(sizeof(char *) * (list_size + 1));
     if (!global->myenv)
         malloc_failed(global);
     while (tmp)
